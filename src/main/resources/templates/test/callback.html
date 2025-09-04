@@ -1,159 +1,181 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PinGrow - 카카오 로그인 콜백</title>
+    <title>핀그로우 - 로그인 처리중</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
         .container {
             background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
-            min-width: 400px;
-            max-width: 600px;
         }
-        h1 { color: #333; margin-bottom: 1rem; }
-        .code-box {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
-        .btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 0.5rem;
-            transition: background 0.3s ease;
-        }
-        .btn:hover { background: #0056b3; }
-        .btn:disabled { 
-            background: #6c757d; 
-            cursor: not-allowed; 
-        }
-        .result {
-            margin-top: 2rem;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: left;
-            display: none;
-        }
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
             border-radius: 50%;
-            border-top-color: #007bff;
-            animation: spin 1s ease-in-out infinite;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .token-info {
-            background: #e9ecef;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            font-family: monospace;
-            font-size: 0.8rem;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .token-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
             word-break: break-all;
+            text-align: left;
+            margin: 15px 0;
+        }
+        .copy-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 5px;
+        }
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        .user-info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: left;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✅ 인증 코드 수신 완료!</h1>
+        <h1>🌱 로그인 처리중...</h1>
+        <div class="spinner" id="spinner"></div>
+        <p id="status">카카오 로그인을 처리하고 있습니다.</p>
         
-        <div class="code-box">
-            <strong>Authorization Code:</strong><br>
-            <span th:text="${authCode}" id="authCode">인증 코드가 표시됩니다</span>
-        </div>
+        <div id="result" style="display: none;"></div>
         
-        <button class="btn" onclick="exchangeCodeForToken()" id="exchangeBtn">
-            JWT 토큰으로 교환하기
-        </button>
-        
-        <div class="result" id="result"></div>
-        
-        <div style="margin-top: 2rem;">
-            <a href="/test/login" class="btn" style="background: #6c757d; text-decoration: none; color: white;">
-                처음으로 돌아가기
-            </a>
+        <div style="margin-top: 30px;">
+            <button onclick="window.location.href='/test/login'" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
+                다시 로그인하기
+            </button>
         </div>
     </div>
 
-    <script>
-        async function exchangeCodeForToken() {
-            const btn = document.getElementById('exchangeBtn');
-            const result = document.getElementById('result');
-            const authCode = document.getElementById('authCode').textContent;
-            
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span> 토큰 교환 중...';
-            result.style.display = 'none';
-            
-            try {
-                const response = await fetch('/api/v1/auth/kakao', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ code: authCode })
-                });
+    <script th:inline="javascript">
+        const authCode = /*[[${authCode}]]*/ null;
+        
+        if (authCode) {
+            // 카카오 인증 코드를 백엔드로 전송
+            fetch('/api/v1/auth/kakao', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    code: authCode
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('spinner').style.display = 'none';
                 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    result.className = 'result success';
-                    result.innerHTML = `
-                        <h3>🎉 로그인 성공!</h3>
-                        <div class="token-info">
-                            <strong>Access Token:</strong><br>
-                            ${data.accessToken.substring(0, 50)}...
+                if (data.accessToken) {
+                    document.getElementById('status').innerHTML = '로그인 성공! 🎉';
+                    
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ 로그인 성공</strong>
                         </div>
-                        <div class="token-info">
+                        
+                        <div class="token-box">
+                            <strong>액세스 토큰:</strong><br>
+                            <div id="accessToken">${data.accessToken}</div>
+                            <button class="copy-btn" onclick="copyToken('${data.accessToken}')">토큰 복사</button>
+                        </div>
+                        
+                        <div class="user-info">
                             <strong>사용자 정보:</strong><br>
-                            ID: ${data.user.id}<br>
-                            이름: ${data.user.name}<br>
-                            이메일: ${data.user.email || '없음'}<br>
-                            프로필 이미지: ${data.user.profileImage ? '있음' : '없음'}
+                            <strong>ID:</strong> ${data.user.id}<br>
+                            <strong>이름:</strong> ${data.user.name}<br>
+                            <strong>이메일:</strong> ${data.user.email || 'N/A'}<br>
+                            <strong>제공자:</strong> ${data.user.provider}<br>
+                            <strong>역할:</strong> ${data.user.role}
                         </div>
-                        <p>이제 이 토큰으로 API를 호출할 수 있습니다!</p>
                     `;
+                    resultDiv.style.display = 'block';
                 } else {
-                    throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+                    document.getElementById('status').innerHTML = '로그인 실패 ❌';
+                    
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ 로그인 실패</strong><br>
+                            ${data.error || JSON.stringify(data)}
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
                 }
-            } catch (error) {
-                result.className = 'result error';
-                result.innerHTML = `
-                    <h3>❌ 오류 발생</h3>
-                    <p><strong>오류 내용:</strong> ${error.message}</p>
-                    <p>카카오 개발자 콘솔에서 앱 설정을 확인해주세요.</p>
+            })
+            .catch(error => {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('status').innerHTML = '로그인 실패 ❌';
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ 네트워크 오류</strong><br>
+                        ${error.message}
+                    </div>
                 `;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'JWT 토큰으로 교환하기';
-                result.style.display = 'block';
-            }
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        function copyToken(token) {
+            navigator.clipboard.writeText(token).then(function() {
+                alert('토큰이 클립보드에 복사되었습니다!');
+            }).catch(function(err) {
+                console.error('토큰 복사 실패:', err);
+                // 폴백: 텍스트 선택
+                const tokenDiv = document.getElementById('accessToken');
+                const range = document.createRange();
+                range.selectNode(tokenDiv);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+            });
         }
     </script>
 </body>

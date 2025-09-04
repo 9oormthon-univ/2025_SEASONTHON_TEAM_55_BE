@@ -49,13 +49,11 @@ public class OAuthCallbackController {
             // 카카오 OAuth 처리
             User user = kakaoOAuthService.processKakaoLogin(code);
             
-            // JWT 토큰 생성
+            // 액세스 토큰만 생성
             String accessToken = jwtUtil.generateAccessToken(user.getId().toString());
-            String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
             
             Map<String, Object> response = new HashMap<>();
             response.put("accessToken", accessToken);
-            response.put("refreshToken", refreshToken);
             response.put("user", Map.of(
                     "id", user.getId(),
                     "email", user.getEmail() != null ? user.getEmail() : "",
