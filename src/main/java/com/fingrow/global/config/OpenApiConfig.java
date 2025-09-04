@@ -21,7 +21,15 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Fingrow API")
-                        .description("Fingrow 핀테크 서비스 API 문서")
+                        .description("Fingrow 핀테크 서비스 API 문서\n\n" +
+                                "## 🏦 금융상품 API\n" +
+                                "- 예금/적금 상품 조회 및 관리\n" +
+                                "- 맞춤형 상품 추천 서비스\n" +
+                                "- 금융감독원 공시 데이터 기반\n\n" +
+                                "## 🔧 사용법\n" +
+                                "1. 먼저 데이터 동기화 API를 호출하여 최신 상품 정보를 가져오세요\n" +
+                                "2. 상품 조회 및 검색 기능을 이용하세요\n" +
+                                "3. 목표 금액과 기간을 입력하여 맞춤 추천을 받으세요")
                         .version("v1.0.0")
                         .contact(new Contact()
                                 .name("Fingrow Team")

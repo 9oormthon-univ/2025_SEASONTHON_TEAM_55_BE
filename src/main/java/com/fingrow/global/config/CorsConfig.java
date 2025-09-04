@@ -63,7 +63,7 @@ public class CorsConfig implements WebMvcConfigurer {
             "Content-Type",
             "X-Total-Count"
         ));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L); // 1시간 동안 preflight 결과 캐시
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

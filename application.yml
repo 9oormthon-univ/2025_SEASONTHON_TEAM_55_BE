@@ -53,3 +53,12 @@ jwt:
   secret: ${JWT_SECRET:fingrow-jwt-secret-key-for-token-generation-and-validation-2024}
   access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_VALIDITY:3600}  # 1시간
   refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_VALIDITY:1209600}  # 2주
+
+# 금융감독원 설정
+finlife:
+  api:
+    key: ${FINLIFE_API_KEY:YOUR_API_KEY_HERE}  # 환경변수로 API 키 설정
+    base-url: https://finlife.fss.or.kr/finlifeapi
+    timeout:
+      connect: 5000
+      read: 10000
