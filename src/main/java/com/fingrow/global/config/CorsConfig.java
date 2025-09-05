@@ -35,7 +35,7 @@ public class CorsConfig implements WebMvcConfigurer {
                         "Content-Type",
                         "X-Total-Count"
                 )
-                .allowCredentials(true)
+                .allowCredentials(false)
                 .maxAge(3600); // 1시간 동안 preflight 결과 캐시
     }
 

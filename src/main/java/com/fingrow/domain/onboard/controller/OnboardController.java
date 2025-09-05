@@ -33,19 +33,6 @@ public class OnboardController {
 
     private final OnboardService onboardService;
 
-    @Operation(summary = "설문 문항 조회", description = "온보딩 설문에 필요한 모든 문항과 선택지를 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "설문 문항 조회 성공",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = OnboardDto.SurveyQuestions.class)))
-    })
-    @GetMapping("/questions")
-    public ResponseEntity<OnboardDto.SurveyQuestions> getSurveyQuestions() {
-        log.info("Fetching survey questions");
-        OnboardDto.SurveyQuestions questions = onboardService.getSurveyQuestions();
-        return ResponseEntity.ok(questions);
-    }
-
     @Operation(summary = "온보딩 설문 제출", description = "사용자의 온보딩 설문을 제출하고 투자 성향을 분석합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "설문 처리 및 분석 완료",
@@ -118,15 +105,6 @@ public class OnboardController {
             Map<String, Object> response = new HashMap<>();
             response.put("completed", true);
             response.put("riskLevel", pref.getRiskLevel());
-            response.put("investmentGoal", pref.getInvestmentGoal());
-            response.put("targetAmount", pref.getTargetAmount());
-            response.put("investmentPeriod", pref.getInvestmentPeriod());
-            response.put("preferredInvestmentTypes", pref.getPreferredInvestmentTypes());
-            response.put("monthlyInvestmentAmount", pref.getMonthlyInvestmentAmount());
-            response.put("currentInvestmentExperience", pref.getCurrentInvestmentExperience());
-            response.put("additionalNotes", pref.getAdditionalNotes());
-            response.put("createdAt", pref.getCreatedAt());
-            response.put("updatedAt", pref.getUpdatedAt());
 
             return ResponseEntity.ok(response);
 

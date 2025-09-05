@@ -61,7 +61,7 @@ public class OnboardService {
      * 기존 투자 선호도를 업데이트하거나 새로 생성합니다
      */
     private InvestmentPreference getOrCreateInvestmentPreference(User user, OnboardDto.SurveyRequest request) {
-        Optional<InvestmentPreference> existingPreference = investmentPreferenceRepository.findByUser(user);
+        Optional<InvestmentPreference> existingPreference = investmentPreferenceRepository.findLatestByUser(user);
 
         if (existingPreference.isPresent()) {
             // 기존 선호도 업데이트
@@ -328,68 +328,6 @@ public class OnboardService {
         return description.toString();
     }
 
-    /**
-     * 설문 문항 정보를 반환합니다
-     */
-    public OnboardDto.SurveyQuestions getSurveyQuestions() {
-        return new OnboardDto.SurveyQuestions(
-                getInvestmentMethodOptions(),
-                getRiskLevelOptions(),
-                getInvestmentTypeOptions(),
-                getPeriodOptions(),
-                getGoalOptions()
-        );
-    }
-
-    private OnboardDto.InvestmentMethodOption[] getInvestmentMethodOptions() {
-        return new OnboardDto.InvestmentMethodOption[]{
-                new OnboardDto.InvestmentMethodOption(InvestmentMethod.LUMP_SUM, "한번에 한 곳", "목표 금액을 한 번에 투자"),
-                new OnboardDto.InvestmentMethodOption(InvestmentMethod.REGULAR, "정기적으로 한 곳", "매월 일정 금액을 한 곳에 투자"),
-                new OnboardDto.InvestmentMethodOption(InvestmentMethod.MIXED, "여러 번에 걸쳐서 한 곳", "분할하여 한 곳에 투자"),
-                new OnboardDto.InvestmentMethodOption(InvestmentMethod.FLEXIBLE, "여러 번에 걸쳐서 여러 곳", "분할하여 여러 곳에 분산 투자")
-        };
-    }
-
-    private OnboardDto.RiskLevelOption[] getRiskLevelOptions() {
-        return new OnboardDto.RiskLevelOption[]{
-                new OnboardDto.RiskLevelOption(RiskLevel.CONSERVATIVE, "감내 못함", "원금 손실을 전혀 감내할 수 없음", "0%"),
-                new OnboardDto.RiskLevelOption(RiskLevel.MODERATE, "10% 이하", "소액의 손실까지 감내 가능", "~10%"),
-                new OnboardDto.RiskLevelOption(RiskLevel.BALANCED, "20~30%", "어느 정도 손실까지 감내 가능", "20~30%"),
-                new OnboardDto.RiskLevelOption(RiskLevel.AGGRESSIVE, "절반", "큰 손실도 감내할 수 있음", "~50%"),
-                new OnboardDto.RiskLevelOption(RiskLevel.SPECULATIVE, "전부", "높은 손실도 감내할 수 있음", "~100%")
-        };
-    }
-
-    private OnboardDto.InvestmentTypeOption[] getInvestmentTypeOptions() {
-        return new OnboardDto.InvestmentTypeOption[]{
-                new OnboardDto.InvestmentTypeOption(PreferredInvestmentType.SAVINGS, "예금/적금", "안전한 원금보장 상품"),
-                new OnboardDto.InvestmentTypeOption(PreferredInvestmentType.ETF, "ETF", "상장지수펀드"),
-                new OnboardDto.InvestmentTypeOption(PreferredInvestmentType.BONDS, "채권", "국채, 회사채 등"),
-                new OnboardDto.InvestmentTypeOption(PreferredInvestmentType.FUNDS, "펀드", "뮤추얼펀드, 주식형펀드 등")
-        };
-    }
-
-    private OnboardDto.PeriodOption[] getPeriodOptions() {
-        return new OnboardDto.PeriodOption[]{
-                new OnboardDto.PeriodOption(InvestmentPeriod.SHORT_TERM, "단기", "1년 이하"),
-                new OnboardDto.PeriodOption(InvestmentPeriod.MEDIUM_TERM, "중기", "1-3년"),
-                new OnboardDto.PeriodOption(InvestmentPeriod.LONG_TERM, "장기", "3-5년"),
-                new OnboardDto.PeriodOption(InvestmentPeriod.VERY_LONG_TERM, "초장기", "5년 이상")
-        };
-    }
-
-    private OnboardDto.GoalOption[] getGoalOptions() {
-        return new OnboardDto.GoalOption[]{
-                new OnboardDto.GoalOption(InvestmentGoal.EMERGENCY_FUND, "비상자금 마련", "예기치 못한 상황에 대비"),
-                new OnboardDto.GoalOption(InvestmentGoal.WEALTH_BUILDING, "자산 증식", "장기적 자산 성장"),
-                new OnboardDto.GoalOption(InvestmentGoal.RETIREMENT, "노후 준비", "은퇴 후 생활 자금"),
-                new OnboardDto.GoalOption(InvestmentGoal.HOME_PURCHASE, "주택 마련", "내 집 마련 자금"),
-                new OnboardDto.GoalOption(InvestmentGoal.EDUCATION, "교육비 준비", "자녀 교육비 등"),
-                new OnboardDto.GoalOption(InvestmentGoal.TRAVEL, "여행 자금", "여행 및 여가 활동"),
-                new OnboardDto.GoalOption(InvestmentGoal.BUSINESS, "창업 자금", "사업 시작 자금"),
-                new OnboardDto.GoalOption(InvestmentGoal.OTHER, "기타", "기타 목적")
-        };
-    }
 
     /**
      * 투자 성향과 선택한 투자 유형 간의 일관성을 검증합니다
@@ -419,13 +357,13 @@ public class OnboardService {
     }
     
     /**
-     * 사용자의 현재 투자 선호도를 조회합니다
+     * 사용자의 현재 투자 선호도를 조회합니다 (가장 최신 데이터)
      */
     @Transactional(readOnly = true)
     public Optional<InvestmentPreference> getUserInvestmentPreference(String userId) {
         try {
             Long userIdLong = Long.parseLong(userId);
-            return investmentPreferenceRepository.findByUserId(userIdLong);
+            return investmentPreferenceRepository.findLatestByUserId(userIdLong);
         } catch (NumberFormatException e) {
             log.error("Invalid userId format: {}", userId);
             return Optional.empty();

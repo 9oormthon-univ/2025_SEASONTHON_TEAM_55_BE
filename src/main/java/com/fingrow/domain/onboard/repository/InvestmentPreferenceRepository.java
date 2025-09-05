@@ -24,4 +24,22 @@ public interface InvestmentPreferenceRepository extends JpaRepository<Investment
            "JOIN FETCH ip.user " +
            "WHERE ip.user.id = :userId")
     Optional<InvestmentPreference> findByUserIdWithUser(@Param("userId") Long userId);
+    
+    /**
+     * 사용자의 가장 최신 투자 성향을 조회합니다
+     */
+    @Query("SELECT ip FROM InvestmentPreference ip " +
+           "WHERE ip.user.id = :userId " +
+           "ORDER BY ip.updatedAt DESC, ip.createdAt DESC " +
+           "LIMIT 1")
+    Optional<InvestmentPreference> findLatestByUserId(@Param("userId") Long userId);
+    
+    /**
+     * 사용자의 가장 최신 투자 성향을 조회합니다 (User 엔티티로)
+     */
+    @Query("SELECT ip FROM InvestmentPreference ip " +
+           "WHERE ip.user = :user " +
+           "ORDER BY ip.updatedAt DESC, ip.createdAt DESC " +
+           "LIMIT 1")
+    Optional<InvestmentPreference> findLatestByUser(@Param("user") User user);
 }
